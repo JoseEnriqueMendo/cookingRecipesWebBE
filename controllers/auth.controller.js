@@ -1,6 +1,6 @@
 const { response } = require('express');
 const { hashPassword } = require('../helpers/encryption');
-const { User } = require('../Models/User');
+const { User } = require('../Models/User.model');
 
 const ServiceResponse = require('../helpers/serviceResponse');
 
