@@ -144,7 +144,7 @@ const updateUser = async (req, res) => {
         },
       }
     );
-    respuesta[0] === 1
+    parseInt(respuesta) === 1
       ? response.setSucessResponse('Usuario editado con exito', true)
       : response.setErrorResponse('No Existe el usuario', 204);
   } catch (error) {
@@ -166,7 +166,7 @@ const deleteUser = async (req, res) => {
         id: id_user,
       },
     });
-    users[0] === 1
+    parseInt(users) === 1
       ? response.setSucessResponse('Usuario eliminado con exito', true)
       : response.setErrorResponse('No Existe el usuario', 204);
   } catch (error) {

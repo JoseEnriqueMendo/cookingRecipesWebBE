@@ -17,7 +17,7 @@ const ingrediente = client_squalize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    image: {
+    img: {
       type: DataTypes.STRING,
       defaultValue:
         'https://img.freepik.com/vector-gratis/dibujos-animados-ingredientes-desayuno-huevos-harina-jugo_24877-59984.jpg',
