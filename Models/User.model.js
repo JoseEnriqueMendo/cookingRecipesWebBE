@@ -24,7 +24,7 @@ const User = client_squalize.define(
     email: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique: false,
+      unique: true,
       validate: {
         isEmail: true,
       },
@@ -33,8 +33,12 @@ const User = client_squalize.define(
       type: DataTypes.STRING,
       allowNull: false,
       validate: {
-        min: 6,
+        len: [6],
       },
+    },
+    image: {
+      type: DataTypes.STRING,
+      defaultValue: 'https://cdn-icons-png.flaticon.com/512/3237/3237472.png',
     },
   },
   {
