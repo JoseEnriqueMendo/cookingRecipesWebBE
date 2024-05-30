@@ -14,9 +14,6 @@ const createIngrediente = async (req, res) => {
     response.setSucessResponse('Ingrediente registrado exitosamente', respuesta);
   } catch (error) {
     response.setErrorResponse(error.message, error.code);
-    // if (error.message === 'Validation error') {
-    //   response.setErrorResponse('Ya existe un ingrediente con ese nombre', error.code);
-    // }
   } finally {
     res.send(response);
   }
@@ -35,9 +32,9 @@ const getall = async (req, res) => {
 
   try {
     const Ingredientes = await ingrediente.findAll(options);
-    Ingredientes !== null
-      ? response.setSucessResponse('Ingrediente(s) encontrados', Ingredientes)
-      : response.setErrorResponse('No Existen ingredientes', 204);
+
+    if (!Ingredientes) response.setErrorResponse('No Existen ingredientes', 204);
+    response.setSucessResponse('Ingrediente(s) encontrados', Ingredientes);
   } catch (error) {
     response.setErrorResponse(error.message, error.code);
   } finally {
@@ -46,16 +43,14 @@ const getall = async (req, res) => {
 };
 
 const getone = async (req, res) => {
-  const userId = req.params.id;
+  const ingredienteId = req.params.id;
   const response = new ServiceResponse();
 
   try {
-    const Ingredientes = await ingrediente.findByPk(userId, {
-      attributes: { exclude: ['createdAt', 'updatedAt'] },
-    });
-    Ingredientes !== null
-      ? response.setSucessResponse('Ingrediente(s) encontrados', Ingredientes)
-      : response.setErrorResponse('No Existen ingredientes', 204);
+    const Ingredientes = await ingrediente.findByPk(ingredienteId);
+
+    if (!Ingredientes) response.setErrorResponse('No Existe el ingrediente', 204);
+    response.setSucessResponse('Ingrediente encontrado', Ingredientes);
   } catch (error) {
     response.setErrorResponse(error.message, error.code);
   } finally {
@@ -67,7 +62,10 @@ const editIngrediente = async (req, res) => {
   const { id, name, category, img } = req.body;
   const response = new ServiceResponse();
   try {
-    const respuesta = await ingrediente.update(
+    const Ingredientes = await ingrediente.findByPk(id);
+    if (!Ingredientes) return response.setErrorResponse('No existe el ingrediente', 204);
+
+    await ingrediente.update(
       {
         name: name,
         category: category,
@@ -79,9 +77,8 @@ const editIngrediente = async (req, res) => {
         },
       }
     );
-    parseInt(respuesta) === 1
-      ? response.setSucessResponse('Ingrediente editado con exito', true)
-      : response.setErrorResponse('No Existe el ingrediente', 204);
+
+    response.setSucessResponse('Ingrediente editado con exito', true);
   } catch (error) {
     response.setErrorResponse(error.message, error.code);
   } finally {
@@ -94,14 +91,15 @@ const deleteIngrediente = async (req, res) => {
 
   const response = new ServiceResponse();
   try {
-    const respuesta = await ingrediente.destroy({
+    const Ingredientes = await ingrediente.findByPk(id);
+    if (!Ingredientes) return response.setErrorResponse('No existe el ingrediente', 204);
+
+    await ingrediente.destroy({
       where: {
         id: id,
       },
     });
-    parseInt(respuesta) === 1
-      ? response.setSucessResponse('Ingrediente eliminado con exito', true)
-      : response.setErrorResponse('No Existe el ingrediente', 204);
+    response.setSucessResponse('Ingrediente eliminado con exito', true);
   } catch (error) {
     response.setErrorResponse(error.message, error.code);
   } finally {

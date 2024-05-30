@@ -20,12 +20,13 @@ const login = async (req, res) => {
       }
     );
 
-    if (users === null) return response.setErrorResponse('No Existe el usuario', 204);
+    if (users === null)
+      return response.setErrorResponse('No Existe un usuario con ese correo', 204);
 
     const validPassword = await bcrypt.compare(password, users.password);
 
     if (!validPassword) {
-      response.setErrorResponse('Contraseña no válida', 401);
+      response.setErrorResponse('Contraseña no erronea', 401);
       return response;
     }
 
@@ -71,11 +72,11 @@ const getall = async (req, res) => {
   const response = new ServiceResponse();
   try {
     const users = await User.findAll({
-      attributes: { exclude: ['createdAt', 'updatedAt', 'password'] },
+      attributes: { exclude: ['password'] },
     });
-    users !== null
-      ? response.setSucessResponse('Usuario(s) encontrados', users)
-      : response.setErrorResponse('No Existen usuarios', 204);
+
+    if (!users) response.setErrorResponse('No Existen usuarios', 204);
+    response.setSucessResponse('Usuario(s) encontrados', users);
   } catch (error) {
     response.setErrorResponse(error.message, error.code);
   } finally {
@@ -85,20 +86,17 @@ const getall = async (req, res) => {
 
 const getThis = async (req, res) => {
   const response = new ServiceResponse();
-
   try {
     const data = await authorize(req);
-    console.log(data);
-
     if (!data.success) return response.setErrorResponse(data.message, data.statusCode);
     const id_user = data.data;
 
     const users = await User.findByPk(id_user, {
-      attributes: { exclude: ['createdAt', 'updatedAt', 'password'] },
+      attributes: { exclude: ['password'] },
     });
-    users !== null
-      ? response.setSucessResponse('Usuario encontrado con exito', users)
-      : response.setErrorResponse('No Existe el usuario', 204);
+
+    if (!users) response.setErrorResponse('No Existe el usuario', 204);
+    response.setSucessResponse('Usuario encontrados', users);
   } catch (error) {
     response.setErrorResponse(error.message, error.code);
   } finally {
@@ -112,11 +110,11 @@ const getone = async (req, res) => {
 
   try {
     const users = await User.findByPk(userId, {
-      attributes: { exclude: ['createdAt', 'updatedAt', 'password'] },
+      attributes: { exclude: ['password'] },
     });
-    users !== null
-      ? response.setSucessResponse('Usuario encontrado con exito', users)
-      : response.setErrorResponse('No Existe el usuario', 204);
+
+    if (!users) response.setErrorResponse('No Existe el usuario', 204);
+    response.setSucessResponse('Usuario encontrado', users);
   } catch (error) {
     response.setErrorResponse(error.message, error.code);
   } finally {
@@ -144,9 +142,9 @@ const updateUser = async (req, res) => {
         },
       }
     );
-    parseInt(respuesta) === 1
-      ? response.setSucessResponse('Usuario editado con exito', true)
-      : response.setErrorResponse('No Existe el usuario', 204);
+
+    if (!respuesta) response.setErrorResponse('No Existen usuarios', 204);
+    response.setSucessResponse('Usuario editado con exito', respuesta);
   } catch (error) {
     response.setErrorResponse(error.message, error.code);
   } finally {
@@ -166,9 +164,9 @@ const deleteUser = async (req, res) => {
         id: id_user,
       },
     });
-    parseInt(users) === 1
-      ? response.setSucessResponse('Usuario eliminado con exito', true)
-      : response.setErrorResponse('No Existe el usuario', 204);
+
+    if (!users) response.setErrorResponse('No Existen usuarios', 204);
+    response.setSucessResponse('Usuario eliminado con exito', users);
   } catch (error) {
     response.setErrorResponse(error.message, error.code);
   } finally {

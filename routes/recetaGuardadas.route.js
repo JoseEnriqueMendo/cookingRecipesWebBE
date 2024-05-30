@@ -1,8 +1,13 @@
 const router = require('express').Router();
-// IMPORTAR EL CONTROLLER
 
-router.route('/example').get(() => {
-  // COLOCAR LA FUNCION
-});
+const {
+  createRecetasGuardadas,
+  deleteRecetasGuardadas,
+  getRecetasGugetardadasUser,
+} = require('../controllers/recetaGuardadas.controller');
+
+router.route('/getThisUser').get(getRecetasGugetardadasUser);
+router.route('/create').post(createRecetasGuardadas);
+router.route('/delete').delete(deleteRecetasGuardadas);
 
 module.exports = router;
