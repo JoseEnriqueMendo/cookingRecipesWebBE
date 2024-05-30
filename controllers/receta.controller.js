@@ -131,7 +131,6 @@ const deleteRecipe = async (req, res = response) => {
     const data = await authorize(req);
 
     if (!data.success) {
-      console.log("Authorization failed:", data.message);
       deleteRecipeResponse.setErrorResponse(data.message, data.statusCode);
       return res.send(deleteRecipeResponse); // Enviar respuesta y finalizar
     }
@@ -143,17 +142,12 @@ const deleteRecipe = async (req, res = response) => {
 
     // Verificar si la receta existe
     if (!receta) {
-      console.log("Recipe not found:", id);
       deleteRecipeResponse.setErrorResponse("Receta no encontrada", 404);
       return res.send(deleteRecipeResponse); // Enviar respuesta y finalizar
     }
 
     // Verificar si el usuario tiene permisos para eliminar la receta
     if (receta.user_id !== id_user) {
-      console.log(
-        "User does not have permission to delete the recipe:",
-        id_user
-      );
       deleteRecipeResponse.setErrorResponse(
         "No se tienen los permisos para eliminar esta receta",
         403
@@ -163,15 +157,42 @@ const deleteRecipe = async (req, res = response) => {
 
     // Eliminar la receta de la base de datos
     await receta.destroy();
-    console.log("Recipe deleted:", id);
-
     deleteRecipeResponse.setSucessResponse("Receta eliminada con éxito");
-    return res.send(deleteRecipeResponse); // Enviar respuesta y finalizar
   } catch (error) {
-    console.error("Error al eliminar receta:", error);
-    deleteRecipeResponse.setErrorResponse("Error al eliminar receta", 500);
-    return res.send(deleteRecipeResponse); // Enviar respuesta y finalizar
+    deleteRecipeResponse.setErrorResponse(error.message, 500);
+  } finally {
+    res.send(deleteRecipeResponse); // Enviar respuesta finalmente
   }
 };
 
-module.exports = { createRecipe, editRecipe, getall, deleteRecipe };
+const getRecipeById = async (req, res = response) => {
+  const { id } = req.params; // Obtener el ID de la receta de los parámetros de la ruta
+  const getRecipeResponse = new ServiceResponse();
+
+  try {
+    // Buscar la receta por su ID
+    const receta = await RecetaModel.findByPk(id);
+
+    // Verificar si la receta existe
+    if (!receta) {
+      getRecipeResponse.setErrorResponse("Receta no encontrada", 404);
+      return res.send(getRecipeResponse); // Enviar respuesta y finalizar
+    }
+
+    // Enviar la receta encontrada
+    getRecipeResponse.setSucessResponse("Receta encontrada con éxito", receta);
+  } catch (error) {
+    // Manejar cualquier error que ocurra durante la operación
+    getRecipeResponse.setErrorResponse(error.message, 500);
+  } finally {
+    res.send(getRecipeResponse); // Enviar respuesta finalmente
+  }
+};
+
+module.exports = {
+  createRecipe,
+  editRecipe,
+  getall,
+  deleteRecipe,
+  getRecipeById,
+};
