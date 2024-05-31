@@ -1,20 +1,24 @@
-const { ingrediente } = require("../Models/ingrediente.model");
-const ServiceResponse = require("../helpers/serviceResponse");
-// const { Op } = require('sequelize');
+const { ingrediente } = require('../Models/ingrediente.model');
+const ServiceResponse = require('../helpers/serviceResponse');
 
 const createIngrediente = async (req, res) => {
   const { name, category, img } = req.body;
   const response = new ServiceResponse();
   try {
+    const ing = await ingrediente.findOne({
+      where: {
+        name: name,
+      },
+    });
+
+    if (ing) return response.setErrorResponse('Ya existe un ingrediente con este nombre', 204);
+
     const respuesta = await ingrediente.create({
       name: name,
       category: category,
       img: img,
     });
-    response.setSucessResponse(
-      "Ingrediente registrado exitosamente",
-      respuesta
-    );
+    response.setSucessResponse('Ingrediente registrado exitosamente', respuesta);
   } catch (error) {
     response.setErrorResponse(error.message, error.code);
   } finally {
@@ -27,7 +31,7 @@ const getall = async (req, res) => {
   const limit = req.query.limit ? parseInt(req.query.limit) : undefined;
   const category = req.query.category;
   const options = {
-    attributes: { exclude: ["createdAt", "updatedAt"] },
+    attributes: { exclude: ['createdAt', 'updatedAt'] },
   };
 
   if (category) options.where = { category: category };
@@ -36,9 +40,8 @@ const getall = async (req, res) => {
   try {
     const Ingredientes = await ingrediente.findAll(options);
 
-    if (!Ingredientes)
-      response.setErrorResponse("No Existen ingredientes", 204);
-    response.setSucessResponse("Ingrediente(s) encontrados", Ingredientes);
+    if (!Ingredientes) response.setErrorResponse('No Existen ingredientes', 204);
+    response.setSucessResponse('Ingrediente(s) encontrados', Ingredientes);
   } catch (error) {
     response.setErrorResponse(error.message, error.code);
   } finally {
@@ -53,9 +56,8 @@ const getone = async (req, res) => {
   try {
     const Ingredientes = await ingrediente.findByPk(ingredienteId);
 
-    if (!Ingredientes)
-      response.setErrorResponse("No Existe el ingrediente", 204);
-    response.setSucessResponse("Ingrediente encontrado", Ingredientes);
+    if (!Ingredientes) response.setErrorResponse('No Existe el ingrediente', 204);
+    response.setSucessResponse('Ingrediente encontrado', Ingredientes);
   } catch (error) {
     response.setErrorResponse(error.message, error.code);
   } finally {
@@ -68,8 +70,7 @@ const editIngrediente = async (req, res) => {
   const response = new ServiceResponse();
   try {
     const Ingredientes = await ingrediente.findByPk(id);
-    if (!Ingredientes)
-      return response.setErrorResponse("No existe el ingrediente", 204);
+    if (!Ingredientes) return response.setErrorResponse('No existe el ingrediente', 204);
 
     await ingrediente.update(
       {
@@ -84,7 +85,7 @@ const editIngrediente = async (req, res) => {
       }
     );
 
-    response.setSucessResponse("Ingrediente editado con exito", true);
+    response.setSucessResponse('Ingrediente editado con exito', true);
   } catch (error) {
     response.setErrorResponse(error.message, error.code);
   } finally {
@@ -98,15 +99,14 @@ const deleteIngrediente = async (req, res) => {
   const response = new ServiceResponse();
   try {
     const Ingredientes = await ingrediente.findByPk(id);
-    if (!Ingredientes)
-      return response.setErrorResponse("No existe el ingrediente", 204);
+    if (!Ingredientes) return response.setErrorResponse('No existe el ingrediente', 204);
 
     await ingrediente.destroy({
       where: {
         id: id,
       },
     });
-    response.setSucessResponse("Ingrediente eliminado con exito", true);
+    response.setSucessResponse('Ingrediente eliminado con exito', true);
   } catch (error) {
     response.setErrorResponse(error.message, error.code);
   } finally {

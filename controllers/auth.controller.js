@@ -47,6 +47,14 @@ const createUser = async (req, res) => {
   const response = new ServiceResponse();
 
   try {
+    const users = await User.findOne({
+      where: {
+        email: email,
+      },
+    });
+
+    if (users) return response.setErrorResponse('Ya existe un usuario para ese correo', 204);
+
     const hashedPassword = await hashPassword(password);
     const respuesta = await User.create({
       name: name,
@@ -60,9 +68,6 @@ const createUser = async (req, res) => {
     response.setSucessResponse('Usuario registrado exitosamente', respuesta);
   } catch (error) {
     response.setErrorResponse(error.message, error.code);
-    if (error.message === 'Validation error') {
-      response.setErrorResponse('Ya existe un usuario para ese correo', error.code);
-    }
   } finally {
     res.send(response);
   }
@@ -130,6 +135,10 @@ const updateUser = async (req, res) => {
     if (!data.success) return response.setErrorResponse(data.message, data.statusCode);
     const id_user = data.data;
 
+    const users = await User.findByPk(id_user);
+
+    if (!users) return response.setErrorResponse('No Existe el usuario', 204);
+
     const respuesta = await User.update(
       {
         name: name,
@@ -143,7 +152,6 @@ const updateUser = async (req, res) => {
       }
     );
 
-    if (!respuesta) response.setErrorResponse('No Existen usuarios', 204);
     response.setSucessResponse('Usuario editado con exito', respuesta);
   } catch (error) {
     response.setErrorResponse(error.message, error.code);
@@ -159,14 +167,17 @@ const deleteUser = async (req, res) => {
     if (!data.success) return response.setErrorResponse(data.message, data.statusCode);
     const id_user = data.data;
 
-    const users = await User.destroy({
+    const users = await User.findByPk(id_user);
+
+    if (!users) return response.setErrorResponse('No Existe el usuario', 204);
+
+    const respuesta = await User.destroy({
       where: {
         id: id_user,
       },
     });
 
-    if (!users) response.setErrorResponse('No Existen usuarios', 204);
-    response.setSucessResponse('Usuario eliminado con exito', users);
+    response.setSucessResponse('Usuario eliminado con exito', respuesta);
   } catch (error) {
     response.setErrorResponse(error.message, error.code);
   } finally {

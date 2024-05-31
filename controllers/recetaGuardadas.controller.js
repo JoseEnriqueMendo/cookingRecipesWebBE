@@ -78,9 +78,16 @@ const deleteRecetasGuardadas = async (req, res) => {
   const response = new ServiceResponse();
 
   try {
+    if (!data.success) return response.setErrorResponse(data.message, data.statusCode);
+
+    const id_user = data.data;
+
     const recetaGuardada = await recetasGuardadas.findByPk(id);
     if (!recetaGuardada)
       return response.setErrorResponse('Receta Guardada no encontrada', 204);
+
+    if (id_user !== recetaGuardada.user_id)
+      return response.setErrorResponse('No cuenta con los permisos para borrarlo', 204);
 
     await recetasGuardadas.destroy({
       where: {

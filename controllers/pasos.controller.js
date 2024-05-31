@@ -1,15 +1,18 @@
-const ServiceResponse = require("../helpers/serviceResponse");
-const { authorize } = require("../helpers/authorize");
-const { pasosreceta } = require("../Models/pasos.model");
-
+const ServiceResponse = require('../helpers/serviceResponse');
+const { authorize } = require('../helpers/authorize');
+const { pasosreceta } = require('../Models/pasos.model');
+const { RecetaModel } = require('../Models/receta.model');
 const createSteps = async (req, res) => {
   const { number, name, description, img, receta_id } = req.body;
   const createStepResponse = new ServiceResponse();
   try {
     const data = await authorize(req);
-
     if (!data.success)
       return createStepResponse.setErrorResponse(data.message, data.statusCode);
+
+    const receta = await RecetaModel.findByPk(receta_id);
+    if (!receta)
+      return createStepResponse.setErrorResponse('No existe receta al cual asiganar', 204);
 
     const steps = await pasosreceta.create({
       number: number,
@@ -19,7 +22,7 @@ const createSteps = async (req, res) => {
       receta_id: receta_id,
     });
 
-    createStepResponse.setSucessResponse("Pasos creados exitosamente", steps);
+    createStepResponse.setSucessResponse('Pasos creados exitosamente', steps);
   } catch (error) {
     createStepResponse.setErrorResponse(error.message, 500);
   } finally {
@@ -35,13 +38,12 @@ const editSteps = async (req, res) => {
   try {
     const data = await authorize(req);
 
-    if (!data.success)
-      return editStepResponse.setErrorResponse(data.message, data.statusCode);
+    if (!data.success) return editStepResponse.setErrorResponse(data.message, data.statusCode);
 
     const step = await pasosreceta.findByPk(id);
 
     if (!step) {
-      return editStepResponse.setErrorResponse("Paso no encontrado", 404);
+      return editStepResponse.setErrorResponse('Paso no encontrado', 404);
     }
 
     step.number = number || step.number;
@@ -51,7 +53,7 @@ const editSteps = async (req, res) => {
 
     await step.save();
 
-    editStepResponse.setSucessResponse("Paso editado exitosamente", step);
+    editStepResponse.setSucessResponse('Paso editado exitosamente', step);
   } catch (error) {
     editStepResponse.setErrorResponse(error.message, 500);
   } finally {
@@ -62,14 +64,14 @@ const editSteps = async (req, res) => {
 const getStepsByRecipeId = async (req, res) => {
   const { id } = req.params;
   const getStepsResponse = new ServiceResponse();
-
   try {
     if (!id) {
-      return getStepsResponse.setErrorResponse(
-        "El parámetro receta_id es requerido",
-        400
-      );
+      return getStepsResponse.setErrorResponse('El parámetro receta_id es requerido', 400);
     }
+
+    const receta = await RecetaModel.findByPk(id);
+    if (!receta)
+      return getStepsResponse.setErrorResponse('No existe receta al cual asignar', 204);
 
     const data = await authorize(req);
 
@@ -85,16 +87,36 @@ const getStepsByRecipeId = async (req, res) => {
 
     if (steps.length === 0) {
       return getStepsResponse.setErrorResponse(
-        "No se encontraron pasos para la receta dada",
+        'No se encontraron pasos para la receta dada',
         404
       );
     }
 
-    getStepsResponse.setSucessResponse("Pasos obtenidos exitosamente", steps);
+    getStepsResponse.setSucessResponse('Pasos obtenidos exitosamente', steps);
   } catch (error) {
     getStepsResponse.setErrorResponse(error.message, 500);
   } finally {
     res.send(getStepsResponse);
+  }
+};
+
+const deleteSteps = async (req, res) => {
+  const { id } = req.params;
+  const deleteStepResponse = new ServiceResponse();
+  try {
+    const steps = await pasosreceta.findByPk(id);
+    if (!steps) return deleteStepResponse.setErrorResponse('El paso buscado no existe', 204);
+    await pasosreceta.destroy({
+      where: {
+        id: id,
+      },
+    });
+
+    deleteStepResponse.setSucessResponse('Paso eliminado correctamente', true);
+  } catch (error) {
+    deleteStepResponse.setErrorResponse(error.message, 500);
+  } finally {
+    res.send(deleteStepResponse);
   }
 };
 
@@ -104,21 +126,17 @@ const deleteStepsByRecipeId = async (req, res) => {
 
   try {
     if (!id) {
-      return deleteStepsResponse.setErrorResponse(
-        "El parámetro receta_id es requerido",
-        400
-      );
+      return deleteStepsResponse.setErrorResponse('El parámetro receta_id es requerido', 400);
     }
 
-    console.log("Intentando eliminar pasos para receta_id:", id); // Registro de depuración
+    const receta = await RecetaModel.findByPk(id);
+    if (!receta)
+      return deleteStepsResponse.setErrorResponse('No existe receta al cual asignar', 204);
 
     const data = await authorize(req);
 
     if (!data.success) {
-      return deleteStepsResponse.setErrorResponse(
-        data.message,
-        data.statusCode
-      );
+      return deleteStepsResponse.setErrorResponse(data.message, data.statusCode);
     }
 
     const steps = await pasosreceta.findAll({
@@ -127,11 +145,9 @@ const deleteStepsByRecipeId = async (req, res) => {
       },
     });
 
-    console.log("Pasos encontrados para eliminación:", steps); // Registro de depuración
-
     if (steps.length === 0) {
       return deleteStepsResponse.setErrorResponse(
-        "No se encontraron pasos para la receta dada",
+        'No se encontraron pasos para la receta dada',
         404
       );
     }
@@ -142,13 +158,10 @@ const deleteStepsByRecipeId = async (req, res) => {
       },
     });
 
-    console.log("Pasos eliminados correctamente."); // Registro de depuración
+    console.log('Pasos eliminados correctamente.'); // Registro de depuración
 
-    deleteStepsResponse.setSucessResponse(
-      "Todos los pasos han sido eliminados exitosamente"
-    );
+    deleteStepsResponse.setSucessResponse('Todos los pasos han sido eliminados exitosamente');
   } catch (error) {
-    console.error("Error al eliminar pasos:", error); // Registro de depuración
     deleteStepsResponse.setErrorResponse(error.message, 500);
   } finally {
     res.send(deleteStepsResponse);
@@ -159,5 +172,6 @@ module.exports = {
   createSteps,
   editSteps,
   getStepsByRecipeId,
+  deleteSteps,
   deleteStepsByRecipeId,
 };
