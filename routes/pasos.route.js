@@ -9,7 +9,7 @@ const {
 
 router.route("/create").post(createSteps);
 router.route("/edit/:id").patch(editSteps);
+router.route("/getById/:id").get(getStepsByRecipeId);
 router.route("/delete/:id").delete(deleteStepsByRecipeId);
-router.route("/getById/:id").delete(getStepsByRecipeId);
 
 module.exports = router;

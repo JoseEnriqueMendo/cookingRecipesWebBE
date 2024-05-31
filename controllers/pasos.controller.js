@@ -60,18 +60,26 @@ const editSteps = async (req, res) => {
 };
 
 const getStepsByRecipeId = async (req, res) => {
-  const { receta_id } = req.params;
+  const { id } = req.params;
   const getStepsResponse = new ServiceResponse();
 
   try {
+    if (!id) {
+      return getStepsResponse.setErrorResponse(
+        "El parámetro receta_id es requerido",
+        400
+      );
+    }
+
     const data = await authorize(req);
 
-    if (!data.success)
+    if (!data.success) {
       return getStepsResponse.setErrorResponse(data.message, data.statusCode);
+    }
 
     const steps = await pasosreceta.findAll({
       where: {
-        receta_id: receta_id,
+        receta_id: id,
       },
     });
 
@@ -91,23 +99,35 @@ const getStepsByRecipeId = async (req, res) => {
 };
 
 const deleteStepsByRecipeId = async (req, res) => {
-  const { receta_id } = req.params;
+  const { id } = req.params;
   const deleteStepsResponse = new ServiceResponse();
 
   try {
+    if (!id) {
+      return deleteStepsResponse.setErrorResponse(
+        "El parámetro receta_id es requerido",
+        400
+      );
+    }
+
+    console.log("Intentando eliminar pasos para receta_id:", id); // Registro de depuración
+
     const data = await authorize(req);
 
-    if (!data.success)
+    if (!data.success) {
       return deleteStepsResponse.setErrorResponse(
         data.message,
         data.statusCode
       );
+    }
 
     const steps = await pasosreceta.findAll({
       where: {
-        receta_id: receta_id,
+        receta_id: id,
       },
     });
+
+    console.log("Pasos encontrados para eliminación:", steps); // Registro de depuración
 
     if (steps.length === 0) {
       return deleteStepsResponse.setErrorResponse(
@@ -118,14 +138,17 @@ const deleteStepsByRecipeId = async (req, res) => {
 
     await pasosreceta.destroy({
       where: {
-        receta_id: receta_id,
+        receta_id: id,
       },
     });
+
+    console.log("Pasos eliminados correctamente."); // Registro de depuración
 
     deleteStepsResponse.setSucessResponse(
       "Todos los pasos han sido eliminados exitosamente"
     );
   } catch (error) {
+    console.error("Error al eliminar pasos:", error); // Registro de depuración
     deleteStepsResponse.setErrorResponse(error.message, 500);
   } finally {
     res.send(deleteStepsResponse);
