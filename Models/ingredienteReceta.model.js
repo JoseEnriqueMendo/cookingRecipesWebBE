@@ -25,10 +25,18 @@ const ingredientereceta = client_squalize.define(
     receta_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      references: {
+        model: 'receta',
+        key: 'id',
+      },
     },
     ingrediente_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      references: {
+        model: 'receta',
+        key: 'ingrediente',
+      },
     },
   },
   {

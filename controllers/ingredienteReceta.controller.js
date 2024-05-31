@@ -78,16 +78,20 @@ const getOneIngRecipe = async (req, res) => {
 
 const getIngRecipes = async (req, res) => {
   const response = new ServiceResponse();
-  const { receta_id } = req.params;
+  const { id } = req.params;
 
   try {
-    const receta = await RecetaModel.findByPk(receta_id);
+    const receta = await RecetaModel.findByPk(id);
     if (!receta) return response.setErrorResponse('La receta no existe', 204);
 
     const ingRecipe = await ingredientereceta.findAll({
       where: {
-        receta_id: receta_id,
+        receta_id: id,
       },
+      include: [
+        { model: RecetaModel, as: 'receta' },
+        { model: ingrediente, as: 'ingrediente' },
+      ],
     });
 
     if (!ingRecipe)
