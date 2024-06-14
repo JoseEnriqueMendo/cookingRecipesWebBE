@@ -1,9 +1,9 @@
-const { hashPassword } = require('../helpers/encryption');
-const { User } = require('../Models/User.model');
-const jwtGenerator = require('../helpers/jwtGenerator');
-const bcrypt = require('bcryptjs');
-const { authorize } = require('../helpers/authorize');
-const ServiceResponse = require('../helpers/serviceResponse');
+const { hashPassword } = require("../helpers/encryption");
+const { User } = require("../Models/User.model");
+const jwtGenerator = require("../helpers/jwtGenerator");
+const bcrypt = require("bcryptjs");
+const { authorize } = require("../helpers/authorize");
+const ServiceResponse = require("../helpers/serviceResponse");
 
 const login = async (req, res) => {
   const { email, password } = req.body;
@@ -16,23 +16,59 @@ const login = async (req, res) => {
         },
       },
       {
-        attributes: { exclude: ['createdAt', 'updatedAt'] },
+        attributes: { exclude: ["createdAt", "updatedAt"] },
       }
     );
 
     if (users === null)
-      return response.setErrorResponse('No Existe un usuario con ese correo', 204);
+      return response.setErrorResponse(
+        "No Existe un usuario con ese correo",
+        204
+      );
 
     const validPassword = await bcrypt.compare(password, users.password);
 
     if (!validPassword) {
-      response.setErrorResponse('Contraseña no erronea', 401);
+      response.setErrorResponse("Contraseña no erronea", 401);
       return response;
     }
 
     const token = jwtGenerator(users.id);
 
-    response.setSucessResponse('Se inició sesión exitosamente', {
+    response.setSucessResponse("Se inició sesión exitosamente", {
+      token: token,
+    });
+  } catch (error) {
+    response.setErrorResponse(error.message, error.code);
+  } finally {
+    res.send(response);
+  }
+};
+
+const loginGoogle = async (req, res) => {
+  const { email } = req.body;
+  const response = new ServiceResponse();
+  try {
+    const users = await User.findOne(
+      {
+        where: {
+          email: email,
+        },
+      },
+      {
+        attributes: { exclude: ["createdAt", "updatedAt"] },
+      }
+    );
+
+    if (users === null)
+      return response.setErrorResponse(
+        "No Existe un usuario con ese correo",
+        204
+      );
+
+    const token = jwtGenerator(users.id);
+
+    response.setSucessResponse("Se inició sesión exitosamente", {
       token: token,
     });
   } catch (error) {
@@ -53,7 +89,11 @@ const createUser = async (req, res) => {
       },
     });
 
-    if (users) return response.setErrorResponse('Ya existe un usuario para ese correo', 204);
+    if (users)
+      return response.setErrorResponse(
+        "Ya existe un usuario para ese correo",
+        204
+      );
 
     const hashedPassword = await hashPassword(password);
     const respuesta = await User.create({
@@ -65,7 +105,39 @@ const createUser = async (req, res) => {
       image: image,
     });
 
-    response.setSucessResponse('Usuario registrado exitosamente', respuesta);
+    response.setSucessResponse("Usuario registrado exitosamente", respuesta);
+  } catch (error) {
+    response.setErrorResponse(error.message, error.code);
+  } finally {
+    res.send(response);
+  }
+};
+
+const createGoogleUser = async (req, res) => {
+  const { name, surname, email, image } = req.body;
+  const response = new ServiceResponse();
+
+  try {
+    const users = await User.findOne({
+      where: {
+        email: email,
+      },
+    });
+
+    if (users)
+      return response.setErrorResponse(
+        "Ya existe un usuario para ese correo",
+        204
+      );
+
+    const respuesta = await User.create({
+      name: name,
+      surname: surname,
+      email: email,
+      image: image,
+    });
+
+    response.setSucessResponse("Usuario registrado exitosamente", respuesta);
   } catch (error) {
     response.setErrorResponse(error.message, error.code);
   } finally {
@@ -77,11 +149,11 @@ const getall = async (req, res) => {
   const response = new ServiceResponse();
   try {
     const users = await User.findAll({
-      attributes: { exclude: ['password'] },
+      attributes: { exclude: ["password"] },
     });
 
-    if (!users) response.setErrorResponse('No Existen usuarios', 204);
-    response.setSucessResponse('Usuario(s) encontrados', users);
+    if (!users) response.setErrorResponse("No Existen usuarios", 204);
+    response.setSucessResponse("Usuario(s) encontrados", users);
   } catch (error) {
     response.setErrorResponse(error.message, error.code);
   } finally {
@@ -93,15 +165,16 @@ const getThis = async (req, res) => {
   const response = new ServiceResponse();
   try {
     const data = await authorize(req);
-    if (!data.success) return response.setErrorResponse(data.message, data.statusCode);
+    if (!data.success)
+      return response.setErrorResponse(data.message, data.statusCode);
     const id_user = data.data;
 
     const users = await User.findByPk(id_user, {
-      attributes: { exclude: ['password'] },
+      attributes: { exclude: ["password"] },
     });
 
-    if (!users) response.setErrorResponse('No Existe el usuario', 204);
-    response.setSucessResponse('Usuario encontrados', users);
+    if (!users) response.setErrorResponse("No Existe el usuario", 204);
+    response.setSucessResponse("Usuario encontrados", users);
   } catch (error) {
     response.setErrorResponse(error.message, error.code);
   } finally {
@@ -115,11 +188,11 @@ const getone = async (req, res) => {
 
   try {
     const users = await User.findByPk(userId, {
-      attributes: { exclude: ['password'] },
+      attributes: { exclude: ["password"] },
     });
 
-    if (!users) response.setErrorResponse('No Existe el usuario', 204);
-    response.setSucessResponse('Usuario encontrado', users);
+    if (!users) response.setErrorResponse("No Existe el usuario", 204);
+    response.setSucessResponse("Usuario encontrado", users);
   } catch (error) {
     response.setErrorResponse(error.message, error.code);
   } finally {
@@ -132,12 +205,13 @@ const updateUser = async (req, res) => {
   const response = new ServiceResponse();
   try {
     const data = await authorize(req);
-    if (!data.success) return response.setErrorResponse(data.message, data.statusCode);
+    if (!data.success)
+      return response.setErrorResponse(data.message, data.statusCode);
     const id_user = data.data;
 
     const users = await User.findByPk(id_user);
 
-    if (!users) return response.setErrorResponse('No Existe el usuario', 204);
+    if (!users) return response.setErrorResponse("No Existe el usuario", 204);
 
     const respuesta = await User.update(
       {
@@ -152,7 +226,7 @@ const updateUser = async (req, res) => {
       }
     );
 
-    response.setSucessResponse('Usuario editado con exito', respuesta);
+    response.setSucessResponse("Usuario editado con exito", respuesta);
   } catch (error) {
     response.setErrorResponse(error.message, error.code);
   } finally {
@@ -164,12 +238,13 @@ const deleteUser = async (req, res) => {
   const response = new ServiceResponse();
   try {
     const data = await authorize(req);
-    if (!data.success) return response.setErrorResponse(data.message, data.statusCode);
+    if (!data.success)
+      return response.setErrorResponse(data.message, data.statusCode);
     const id_user = data.data;
 
     const users = await User.findByPk(id_user);
 
-    if (!users) return response.setErrorResponse('No Existe el usuario', 204);
+    if (!users) return response.setErrorResponse("No Existe el usuario", 204);
 
     const respuesta = await User.destroy({
       where: {
@@ -177,7 +252,7 @@ const deleteUser = async (req, res) => {
       },
     });
 
-    response.setSucessResponse('Usuario eliminado con exito', respuesta);
+    response.setSucessResponse("Usuario eliminado con exito", respuesta);
   } catch (error) {
     response.setErrorResponse(error.message, error.code);
   } finally {
@@ -192,9 +267,29 @@ const verifyToken = async (req, res) => {
     if (!data.success) {
       return response.setErrorResponse(data.message, data.statusCode);
     }
-    response.setSucessResponse('Token validado', true);
+    response.setSucessResponse("Token validado", true);
   } catch (error) {
     response.setErrorResponse(error.message, error.code);
+  } finally {
+    res.send(response);
+  }
+};
+
+const getUserByEmail = async (req, res) => {
+  const response = new ServiceResponse();
+  try {
+    const { email } = req.params; // Obtener el email de los parámetros de la solicitud
+    const user = await User.findOne({
+      where: { email },
+    });
+
+    if (!user) {
+      response.setErrorResponse("Usuario no encontrado", 404);
+    } else {
+      response.setSucessResponse("Usuario encontrado", user);
+    }
+  } catch (error) {
+    response.setErrorResponse(error.message, 500);
   } finally {
     res.send(response);
   }
@@ -209,4 +304,7 @@ module.exports = {
   getThis,
   deleteUser,
   updateUser,
+  getUserByEmail,
+  createGoogleUser,
+  loginGoogle,
 };
