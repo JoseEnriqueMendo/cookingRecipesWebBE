@@ -3,6 +3,7 @@ const { authorize } = require("../helpers/authorize");
 const moment = require("moment");
 
 const { RecetaModel } = require("../Models/receta.model");
+const { User } = require("../Models/User.model");
 
 const createRecipe = async (req, res) => {
   const { description, img, name, dificultad, time, porcion, date } = req.body;
@@ -44,9 +45,6 @@ const createRecipe = async (req, res) => {
         message: err.message,
         field: err.path,
       }));
-      // const errorMessage = validationErrors
-      //   .map((error) => error.message)
-      //   .join("; ");ks
 
       createRecipeResponse.setErrorResponse(validationErrors, 404);
     }
@@ -171,7 +169,13 @@ const getRecipeById = async (req, res = response) => {
 
   try {
     // Buscar la receta por su ID
-    const receta = await RecetaModel.findByPk(id);
+    const receta = await RecetaModel.findByPk(id, {
+      include: {
+        model: User,
+        as: "User",
+        attributes: { exclude: ["password"] },
+      },
+    });
 
     // Verificar si la receta existe
     if (!receta) {

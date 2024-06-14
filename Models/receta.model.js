@@ -63,6 +63,10 @@ const RecetaModel = client_squalize.define(
     user_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      references: {
+        model: 'User',
+        key: 'id',
+      },
     },
   },
   {
