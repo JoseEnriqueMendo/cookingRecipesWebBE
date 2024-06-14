@@ -124,7 +124,7 @@ const deleteRecipe = async (req, res = response) => {
 
     if (!data.success) {
       deleteRecipeResponse.setErrorResponse(data.message, data.statusCode);
-      return res.send(deleteRecipeResponse); // Enviar respuesta y finalizar
+      return deleteRecipeResponse; // Enviar respuesta y finalizar
     }
 
     const id_user = data.data;
@@ -135,7 +135,7 @@ const deleteRecipe = async (req, res = response) => {
     // Verificar si la receta existe
     if (!receta) {
       deleteRecipeResponse.setErrorResponse('Receta no encontrada', 404);
-      return res.send(deleteRecipeResponse); // Enviar respuesta y finalizar
+      return deleteRecipeResponse; // Enviar respuesta y finalizar
     }
 
     // Verificar si el usuario tiene permisos para eliminar la receta
@@ -144,7 +144,7 @@ const deleteRecipe = async (req, res = response) => {
         'No se tienen los permisos para eliminar esta receta',
         403
       );
-      return res.send(deleteRecipeResponse); // Enviar respuesta y finalizar
+      return deleteRecipeResponse; // Enviar respuesta y finalizar
     }
 
     // Eliminar la receta de la base de datos
@@ -174,7 +174,7 @@ const getRecipeById = async (req, res = response) => {
     // Verificar si la receta existe
     if (!receta) {
       getRecipeResponse.setErrorResponse('Receta no encontrada', 404);
-      return res.send(getRecipeResponse); // Enviar respuesta y finalizar
+      return getRecipeResponse; // Enviar respuesta y finalizar
     }
 
     // Enviar la receta encontrada

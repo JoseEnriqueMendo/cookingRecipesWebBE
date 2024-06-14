@@ -73,12 +73,6 @@ const getStepsByRecipeId = async (req, res) => {
     if (!receta)
       return getStepsResponse.setErrorResponse('No existe receta al cual asignar', 204);
 
-    const data = await authorize(req);
-
-    if (!data.success) {
-      return getStepsResponse.setErrorResponse(data.message, data.statusCode);
-    }
-
     const steps = await pasosreceta.findAll({
       where: {
         receta_id: id,
