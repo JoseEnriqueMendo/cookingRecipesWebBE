@@ -1,8 +1,8 @@
-const { DataTypes } = require('sequelize');
-const { client_squalize } = require('../db/index');
+const { DataTypes } = require("sequelize");
+const { client_squalize } = require("../db/index");
 
 const User = client_squalize.define(
-  'User',
+  "User",
   {
     id: {
       type: DataTypes.INTEGER,
@@ -19,7 +19,7 @@ const User = client_squalize.define(
     },
     phone: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     email: {
       type: DataTypes.STRING,
@@ -31,18 +31,18 @@ const User = client_squalize.define(
     },
     password: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
       validate: {
         len: [6],
       },
     },
     image: {
       type: DataTypes.STRING,
-      defaultValue: 'https://cdn-icons-png.flaticon.com/512/3237/3237472.png',
+      defaultValue: "https://cdn-icons-png.flaticon.com/512/3237/3237472.png",
     },
   },
   {
-    tableName: 'User',
+    tableName: "User",
     timestamps: false,
   }
 );

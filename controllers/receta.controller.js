@@ -1,8 +1,8 @@
-const ServiceResponse = require('../helpers/serviceResponse');
-const { authorize } = require('../helpers/authorize');
-const moment = require('moment');
+const ServiceResponse = require("../helpers/serviceResponse");
+const { authorize } = require("../helpers/authorize");
+const moment = require("moment");
 
-const { RecetaModel } = require('../Models/receta.model');
+const { RecetaModel } = require("../Models/receta.model");
 
 const createRecipe = async (req, res) => {
   const { description, img, name, dificultad, time, porcion, date } = req.body;
@@ -12,13 +12,16 @@ const createRecipe = async (req, res) => {
     const data = await authorize(req);
 
     if (!data.success)
-      return createRecipeResponse.setErrorResponse(data.message, data.statusCode);
+      return createRecipeResponse.setErrorResponse(
+        data.message,
+        data.statusCode
+      );
     const id_user = data.data;
 
-    const parsedDate = moment(date, 'DD/MM/YYYY', true);
+    const parsedDate = moment(date, "DD/MM/YYYY", true);
 
     if (!parsedDate.isValid()) {
-      return createRecipeResponse.setErrorResponse('Fecha inválida', 400);
+      return createRecipeResponse.setErrorResponse("Fecha inválida", 400);
     }
     const newRecipe = await RecetaModel.create({
       description,
@@ -31,9 +34,12 @@ const createRecipe = async (req, res) => {
       user_id: id_user,
     });
 
-    createRecipeResponse.setSucessResponse('Receta creada exitosamente', newRecipe);
+    createRecipeResponse.setSucessResponse(
+      "Receta creada exitosamente",
+      newRecipe
+    );
   } catch (error) {
-    if (error.name === 'SequelizeValidationError') {
+    if (error.name === "SequelizeValidationError") {
       const validationErrors = error.errors.map((err) => ({
         message: err.message,
         field: err.path,
@@ -63,16 +69,16 @@ const editRecipe = async (req, res = response) => {
       return editRecipeResponse.setErrorResponse(data.message, data.statusCode);
     const id_user = data.data;
 
-    const parsedDate = await moment(date, 'DD/MM/YYYY', true);
+    const parsedDate = await moment(date, "DD/MM/YYYY", true);
 
     if (!parsedDate.isValid()) {
-      return editRecipeResponse.setErrorResponse('Fecha inválida', 400);
+      return editRecipeResponse.setErrorResponse("Fecha inválida", 400);
     }
 
     const fk = await RecetaModel.findByPk(id);
     if (fk.user_id != id_user) {
       return editRecipeResponse.setErrorResponse(
-        'No se tienen los permisos para editar esta receta',
+        "No se tienen los permisos para editar esta receta",
         403
       );
     }
@@ -81,7 +87,7 @@ const editRecipe = async (req, res = response) => {
 
     // Verificar si la receta existe
     if (!receta) {
-      editRecipeResponse.setErrorResponse('Receta no encontrada', 404);
+      editRecipeResponse.setErrorResponse("Receta no encontrada", 404);
     }
 
     // Actualizar los campos de la receta
@@ -96,7 +102,7 @@ const editRecipe = async (req, res = response) => {
     // Guardar los cambios en la base de datos
     await receta.save();
 
-    editRecipeResponse.setErrorResponse('Receta editada con éxito', receta);
+    editRecipeResponse.setErrorResponse("Receta editada con éxito", receta);
   } catch (error) {
     editRecipeResponse.setErrorResponse(error.message, 500);
   } finally {
@@ -109,7 +115,7 @@ const getall = async (req, res = response) => {
   try {
     const users = await RecetaModel.findAll();
 
-    response.setSucessResponse('Las recetas se obtuvieron con éxito', users);
+    response.setSucessResponse("Las recetas se obtuvieron con éxito", users);
   } catch (error) {
     return response.setErrorResponse(error.message, error.code);
   } finally {
@@ -136,14 +142,14 @@ const deleteRecipe = async (req, res = response) => {
 
     // Verificar si la receta existe
     if (!receta) {
-      deleteRecipeResponse.setErrorResponse('Receta no encontrada', 404);
+      deleteRecipeResponse.setErrorResponse("Receta no encontrada", 404);
       return res.send(deleteRecipeResponse); // Enviar respuesta y finalizar
     }
 
     // Verificar si el usuario tiene permisos para eliminar la receta
     if (receta.user_id !== id_user) {
       deleteRecipeResponse.setErrorResponse(
-        'No se tienen los permisos para eliminar esta receta',
+        "No se tienen los permisos para eliminar esta receta",
         403
       );
       return res.send(deleteRecipeResponse); // Enviar respuesta y finalizar
@@ -151,7 +157,7 @@ const deleteRecipe = async (req, res = response) => {
 
     // Eliminar la receta de la base de datos
     await receta.destroy();
-    deleteRecipeResponse.setSucessResponse('Receta eliminada con éxito');
+    deleteRecipeResponse.setSucessResponse("Receta eliminada con éxito", true);
   } catch (error) {
     deleteRecipeResponse.setErrorResponse(error.message, 500);
   } finally {
@@ -169,12 +175,12 @@ const getRecipeById = async (req, res = response) => {
 
     // Verificar si la receta existe
     if (!receta) {
-      getRecipeResponse.setErrorResponse('Receta no encontrada', 404);
+      getRecipeResponse.setErrorResponse("Receta no encontrada", 404);
       return res.send(getRecipeResponse); // Enviar respuesta y finalizar
     }
 
     // Enviar la receta encontrada
-    getRecipeResponse.setSucessResponse('Receta encontrada con éxito', receta);
+    getRecipeResponse.setSucessResponse("Receta encontrada con éxito", receta);
   } catch (error) {
     // Manejar cualquier error que ocurra durante la operación
     getRecipeResponse.setErrorResponse(error.message, 500);
