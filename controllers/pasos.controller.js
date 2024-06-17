@@ -77,6 +77,7 @@ const getStepsByRecipeId = async (req, res) => {
       where: {
         receta_id: id,
       },
+      order: [['number', 'ASC']],
     });
 
     if (steps.length === 0) {

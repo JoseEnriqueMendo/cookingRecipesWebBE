@@ -105,6 +105,9 @@ const deleteIngrediente = async (req, res) => {
       where: {
         id: id,
       },
+      order: [
+        ['category', 'ASC'], // Ordena por el campo "number" de manera ascendente (ASC)
+      ],
     });
     response.setSucessResponse('Ingrediente eliminado con exito', true);
   } catch (error) {
