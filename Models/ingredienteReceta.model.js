@@ -1,13 +1,17 @@
-const { DataTypes } = require('sequelize');
-const { client_squalize } = require('../db/index');
+const { DataTypes } = require("sequelize");
+const { client_squalize } = require("../db/index");
 
 const ingredientereceta = client_squalize.define(
-  'ingredientereceta',
+  "ingredientereceta",
   {
     id: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true,
+    },
+    priority: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
     },
     medicion: {
       type: DataTypes.STRING,
@@ -26,21 +30,21 @@ const ingredientereceta = client_squalize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: 'receta',
-        key: 'id',
+        model: "receta",
+        key: "id",
       },
     },
     ingrediente_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: 'receta',
-        key: 'ingrediente',
+        model: "receta",
+        key: "ingrediente",
       },
     },
   },
   {
-    tableName: 'ingredientereceta',
+    tableName: "ingredientereceta",
     timestamps: false,
   }
 );
