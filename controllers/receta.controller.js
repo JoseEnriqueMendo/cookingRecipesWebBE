@@ -115,6 +115,30 @@ const getall = async (req, res = response) => {
   }
 };
 
+const getallOfUser = async (req, res = response) => {
+  const response = new ServiceResponse();
+  try {
+    const data = await authorize(req);
+
+    if (!data.success)
+      return createRecipeResponse.setErrorResponse(data.message, data.statusCode);
+
+    const id_user = data.data;
+
+    const usersRecipes = await RecetaModel.findAll({
+      where: {
+        user_id: id_user,
+      },
+    });
+
+    response.setSucessResponse('Las recetas se obtuvieron con éxito', usersRecipes);
+  } catch (error) {
+    return response.setErrorResponse(error.message, error.code);
+  } finally {
+    res.send(response);
+  }
+};
+
 const deleteRecipe = async (req, res = response) => {
   const { id } = req.params; // Obtener el ID de la receta a eliminar
   const deleteRecipeResponse = new ServiceResponse();
@@ -193,4 +217,5 @@ module.exports = {
   getall,
   deleteRecipe,
   getRecipeById,
+  getallOfUser,
 };
