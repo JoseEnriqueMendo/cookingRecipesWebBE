@@ -134,6 +134,13 @@ const deleteStepsByRecipeId = async (req, res) => {
       return deleteStepsResponse.setErrorResponse(data.message, data.statusCode);
     }
 
+    if (receta.user_id !== data.data) {
+      return deleteStepsResponse.setErrorResponse(
+        'No se tienen los permisos para eliminar esta receta',
+        403
+      );
+    }
+
     const steps = await pasosreceta.findAll({
       where: {
         receta_id: id,

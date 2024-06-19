@@ -1,18 +1,11 @@
-const { ingrediente } = require("../Models/ingrediente.model");
-const ServiceResponse = require("../helpers/serviceResponse");
-const { RecetaModel } = require("../Models/receta.model");
-const { ingredientereceta } = require("../Models/ingredienteReceta.model");
+const { ingrediente } = require('../Models/ingrediente.model');
+const ServiceResponse = require('../helpers/serviceResponse');
+const { RecetaModel } = require('../Models/receta.model');
+const { ingredientereceta } = require('../Models/ingredienteReceta.model');
 
 const createIngRecipe = async (req, res) => {
   const response = new ServiceResponse();
-  const {
-    cantidad,
-    medicion,
-    especificacion,
-    ingrediente_id,
-    receta_id,
-    priority,
-  } = req.body;
+  const { cantidad, medicion, especificacion, ingrediente_id, receta_id, priority } = req.body;
 
   try {
     const ingRecipe = await ingredientereceta.create({
@@ -25,7 +18,7 @@ const createIngRecipe = async (req, res) => {
     });
 
     response.setSucessResponse(
-      "El ingrediente se asigno correctamente a la receta ",
+      'El ingrediente se asigno correctamente a la receta ',
       ingRecipe
     );
   } catch (error) {
@@ -44,9 +37,7 @@ const editIngRecipe = async (req, res) => {
   try {
     const ingRecipe = await ingredientereceta.findByPk(id);
     if (!ingRecipe)
-      return response.setErrorResponse(
-        "No hay un ingrediente asignado a esta receta"
-      );
+      return response.setErrorResponse('No hay un ingrediente asignado a esta receta');
 
     await ingredientereceta.update(
       {
@@ -62,7 +53,7 @@ const editIngRecipe = async (req, res) => {
       }
     );
 
-    response.setSucessResponse("El ingrediente fue editado con exito ", true);
+    response.setSucessResponse('El ingrediente fue editado con exito ', true);
   } catch (error) {
     response.setErrorResponse(error.message, error.code);
   } finally {
@@ -77,11 +68,9 @@ const getOneIngRecipe = async (req, res) => {
   try {
     const ingRecipe = await ingredientereceta.findByPk(id);
     if (!ingRecipe)
-      return response.setErrorResponse(
-        "No hay un ingrediente asignado a esta receta"
-      );
+      return response.setErrorResponse('No hay un ingrediente asignado a esta receta');
 
-    response.setSucessResponse("El Obtenido con exito  ", ingRecipe);
+    response.setSucessResponse('El Obtenido con exito  ', ingRecipe);
   } catch (error) {
     response.setErrorResponse(error.message, error.code);
   } finally {
@@ -95,25 +84,23 @@ const getIngRecipes = async (req, res) => {
 
   try {
     const receta = await RecetaModel.findByPk(id);
-    if (!receta) return response.setErrorResponse("La receta no existe", 204);
+    if (!receta) return response.setErrorResponse('La receta no existe', 204);
 
     const ingRecipe = await ingredientereceta.findAll({
       where: {
         receta_id: id,
       },
       include: [
-        { model: RecetaModel, as: "receta" },
-        { model: ingrediente, as: "ingrediente" },
+        { model: RecetaModel, as: 'receta' },
+        { model: ingrediente, as: 'ingrediente' },
       ],
     });
 
     if (!ingRecipe)
-      return response.setErrorResponse(
-        "No hay un ingrediente asignado a esta receta"
-      );
+      return response.setErrorResponse('No hay un ingrediente asignado a esta receta');
 
     response.setSucessResponse(
-      "Ingrediente(s) asignados a la receta obtenidos con exito  ",
+      'Ingrediente(s) asignados a la receta obtenidos con exito  ',
       ingRecipe
     );
   } catch (error) {
@@ -128,7 +115,20 @@ const deleteIngRecipes = async (req, res) => {
   const { receta_id } = req.params;
   try {
     const receta = await RecetaModel.findByPk(receta_id);
-    if (!receta) return response.setErrorResponse("La receta no existe", 204);
+    if (!receta) return response.setErrorResponse('La receta no existe', 204);
+
+    const data = await authorize(req);
+
+    if (!data.success) {
+      return response.setErrorResponse(data.message, data.statusCode);
+    }
+
+    if (receta.user_id !== data.data) {
+      return response.setErrorResponse(
+        'No se tienen los permisos para eliminar esta receta',
+        403
+      );
+    }
 
     const ingRecipe = await ingredientereceta.destroy({
       where: {
@@ -137,12 +137,10 @@ const deleteIngRecipes = async (req, res) => {
     });
 
     if (!ingRecipe)
-      return response.setErrorResponse(
-        "No hay un ingrediente asignado a esta receta"
-      );
+      return response.setErrorResponse('No hay un ingrediente asignado a esta receta');
 
     response.setSucessResponse(
-      "Ingrediente(s) asignados a la receta eliminados con exito  ",
+      'Ingrediente(s) asignados a la receta eliminados con exito  ',
       ingRecipe
     );
   } catch (error) {
@@ -159,9 +157,7 @@ const deletaIngRecipe = async (req, res) => {
   try {
     const ingRecipe = await ingredientereceta.findByPk(id);
     if (!ingRecipe)
-      return response.setErrorResponse(
-        "No hay un ingrediente asignado a esta receta"
-      );
+      return response.setErrorResponse('No hay un ingrediente asignado a esta receta');
 
     await ingredientereceta.destroy({
       where: {
@@ -169,7 +165,7 @@ const deletaIngRecipe = async (req, res) => {
       },
     });
 
-    response.setSucessResponse("El ingrediente fue eliminado con exito ", true);
+    response.setSucessResponse('El ingrediente fue eliminado con exito ', true);
   } catch (error) {
     response.setErrorResponse(error.message, error.code);
   } finally {

@@ -57,23 +57,26 @@ const editRecipe = async (req, res = response) => {
   try {
     const data = await authorize(req);
 
-    if (!data.success)
-      return editRecipeResponse.setErrorResponse(data.message, data.statusCode);
-    const id_user = data.data;
-
-    const parsedDate = await moment(date, 'DD/MM/YYYY', true);
+    const parsedDate = await moment(date, 'DD-MM-YYYY', true);
 
     if (!parsedDate.isValid()) {
       return editRecipeResponse.setErrorResponse('Fecha inválida', 400);
     }
 
     const fk = await RecetaModel.findByPk(id);
+
+    if (!data.success)
+      return editRecipeResponse.setErrorResponse(data.message, data.statusCode);
+
+    const id_user = data.data;
+
     if (fk.user_id != id_user) {
       return editRecipeResponse.setErrorResponse(
         'No se tienen los permisos para editar esta receta',
         403
       );
     }
+
     // Buscar la receta por su ID
     const receta = await RecetaModel.findByPk(id);
 
@@ -94,7 +97,7 @@ const editRecipe = async (req, res = response) => {
     // Guardar los cambios en la base de datos
     await receta.save();
 
-    editRecipeResponse.setErrorResponse('Receta editada con éxito', receta);
+    editRecipeResponse.setSucessResponse('Receta editada con éxito', receta);
   } catch (error) {
     editRecipeResponse.setErrorResponse(error.message, 500);
   } finally {
