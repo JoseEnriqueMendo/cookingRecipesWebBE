@@ -1,8 +1,8 @@
-const { DataTypes } = require('sequelize');
-const { client_squalize } = require('../db/index');
+const { DataTypes } = require("sequelize");
+const { client_squalize } = require("../db/index");
 
 const RecetaModel = client_squalize.define(
-  'receta',
+  "receta",
   {
     id: {
       type: DataTypes.INTEGER,
@@ -17,7 +17,7 @@ const RecetaModel = client_squalize.define(
       type: DataTypes.STRING(512),
       validate: {
         isUrl: {
-          msg: 'El campo imagen debe ser una URL válida.',
+          msg: "El campo imagen debe ser una URL válida.",
         },
       },
       allowNull: false,
@@ -35,11 +35,11 @@ const RecetaModel = client_squalize.define(
       allowNull: false,
       validate: {
         isFloat: {
-          msg: 'El campo time debe ser un número de punto flotante.',
+          msg: "El campo time debe ser un número de punto flotante.",
         },
         min: {
           args: [0],
-          msg: 'El campo time debe ser mayor o igual a 0.',
+          msg: "El campo time debe ser mayor o igual a 0.",
         },
       },
     },
@@ -48,11 +48,11 @@ const RecetaModel = client_squalize.define(
       allowNull: false,
       validate: {
         isFloat: {
-          msg: 'El campo porcion debe ser un número de punto flotante.',
+          msg: "El campo porcion debe ser un número de punto flotante.",
         },
         min: {
           args: [0],
-          msg: 'El campo porcion debe ser mayor o igual a 0.',
+          msg: "El campo porcion debe ser mayor o igual a 0.",
         },
       },
     },
@@ -64,13 +64,13 @@ const RecetaModel = client_squalize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: 'User',
-        key: 'id',
+        model: "User",
+        key: "id",
       },
     },
   },
   {
-    tableName: 'receta', // Nombre de la tabla en la base de datos
+    tableName: "receta", // Nombre de la tabla en la base de datos
     timestamps: false, // Desactiva createdAt y updatedAt si no existen en la tabla
   }
 );
