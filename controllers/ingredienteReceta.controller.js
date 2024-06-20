@@ -2,6 +2,7 @@ const { ingrediente } = require('../Models/ingrediente.model');
 const ServiceResponse = require('../helpers/serviceResponse');
 const { RecetaModel } = require('../Models/receta.model');
 const { ingredientereceta } = require('../Models/ingredienteReceta.model');
+const { authorize } = require('../helpers/authorize');
 
 const createIngRecipe = async (req, res) => {
   const response = new ServiceResponse();
@@ -112,9 +113,9 @@ const getIngRecipes = async (req, res) => {
 
 const deleteIngRecipes = async (req, res) => {
   const response = new ServiceResponse();
-  const { receta_id } = req.params;
+  const { id } = req.params;
   try {
-    const receta = await RecetaModel.findByPk(receta_id);
+    const receta = await RecetaModel.findByPk(id);
     if (!receta) return response.setErrorResponse('La receta no existe', 204);
 
     const data = await authorize(req);
@@ -132,7 +133,7 @@ const deleteIngRecipes = async (req, res) => {
 
     const ingRecipe = await ingredientereceta.destroy({
       where: {
-        receta_id: receta_id,
+        receta_id: id,
       },
     });
 
