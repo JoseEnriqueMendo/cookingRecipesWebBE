@@ -8,6 +8,7 @@ const {
   getallOfUser,
   getRecipeByIng,
   FuzzySearch,
+  getEqualorLess,
 } = require("../controllers/receta.controller");
 
 router.route("/create").post(createRecipe);
@@ -18,5 +19,6 @@ router.route("/get/:id").get(getRecipeById);
 router.route("/getThisUser").get(getallOfUser);
 router.route("/getByIng").post(getRecipeByIng);
 router.route("/fuzzysearch/:name").get(FuzzySearch);
+router.route("/getEqOrLess").post(getRecipeByIng);
 
 module.exports = router;

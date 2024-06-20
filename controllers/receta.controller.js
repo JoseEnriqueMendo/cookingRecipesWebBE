@@ -340,6 +340,62 @@ const FuzzySearch = async (req, res) => {
   }
 };
 
+const getEqualorLess = async (req, res) => {
+  const searchResponse = new ServiceResponse();
+  const { ingredientes } = req.body;
+  try {
+    if (
+      !ingredientes ||
+      !Array.isArray(ingredientes) ||
+      ingredientes.length === 0
+    ) {
+      getResponse.setErrorResponse(
+        "Debe proporcionar una lista de ingredientes válida",
+        400
+      );
+      return;
+    }
+
+    // Obtener los IDs de los ingredientes según sus nombres
+    const ingredientesEncontrados = await ingrediente.findAll({
+      attributes: ["id"],
+      where: {
+        name: {
+          [Op.in]: ingredientes,
+        },
+      },
+    });
+
+    // Obtener solo los IDs de los ingredientes encontrados
+    const idsIngredientes = ingredientesEncontrados.map(
+      (ingrediente) => ingrediente.id
+    );
+    const recipes = await RecetaModel.findAll({
+      include: {
+        model: ingredientereceta,
+        as: "ingredientesReceta",
+        include: {
+          model: ingrediente,
+          as: "ingrediente",
+          where: {
+            name: {
+              [Op.in]: idsIngredientes,
+            },
+          },
+        },
+      },
+    });
+    const filteredRecipes = recipes.filter(
+      (recipe) => recipe.ingredientesReceta.length > 0
+    );
+    searchResponse.setSucessResponse("Recetas encontradas", filteredRecipes);
+  } catch (error) {
+    searchResponse.setErrorResponse(error.message, 500);
+  } finally {
+    res.send(searchResponse);
+  }
+};
+
 module.exports = {
   createRecipe,
   editRecipe,
@@ -349,4 +405,5 @@ module.exports = {
   getallOfUser,
   getRecipeByIng,
   FuzzySearch,
+  getEqualorLess,
 };
