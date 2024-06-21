@@ -3,11 +3,13 @@ const router = require('express').Router();
 const {
   createRecetasGuardadas,
   deleteRecetasGuardadas,
-  getRecetasGugetardadasUser,
+  getRecetasGuardadasUser,
+  deleteRecetasGuardadasByRecipe,
 } = require('../controllers/recetaGuardadas.controller');
 
-router.route('/getThisUser').get(getRecetasGugetardadasUser);
+router.route('/getThisUser').get(getRecetasGuardadasUser);
 router.route('/create').post(createRecetasGuardadas);
-router.route('/delete').delete(deleteRecetasGuardadas);
+router.route('/delete/:id').delete(deleteRecetasGuardadas);
+router.route('/deleteAllbyRecipe/:id').delete(deleteRecetasGuardadasByRecipe);
 
 module.exports = router;
