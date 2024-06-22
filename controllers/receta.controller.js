@@ -349,7 +349,7 @@ const getEqualorLess = async (req, res) => {
       !Array.isArray(ingredientes) ||
       ingredientes.length === 0
     ) {
-      getResponse.setErrorResponse(
+      searchResponse.setErrorResponse(
         "Debe proporcionar una lista de ingredientes válida",
         400
       );
