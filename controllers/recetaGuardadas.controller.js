@@ -4,7 +4,7 @@ const { authorize } = require('../helpers/authorize');
 const { RecetaModel } = require('../Models/receta.model');
 const { User } = require('../Models/User.model');
 
-const getRecetasGugetardadasUser = async (req, res) => {
+const getRecetasGuardadasUser = async (req, res) => {
   const response = new ServiceResponse();
   try {
     const data = await authorize(req);
@@ -54,7 +54,7 @@ const createRecetasGuardadas = async (req, res) => {
       },
     });
 
-    if (respuestaReceta != [])
+    if (respuestaReceta.length !== 0)
       return response.setErrorResponse('El usuario ya tiene guardada esa receta');
 
     const respuesta = await recetasGuardadas.create({
@@ -74,24 +74,32 @@ const createRecetasGuardadas = async (req, res) => {
 };
 
 const deleteRecetasGuardadas = async (req, res) => {
-  const { id } = req.body;
+  const { id } = req.params;
   const response = new ServiceResponse();
 
   try {
+    const data = await authorize(req);
+
     if (!data.success) return response.setErrorResponse(data.message, data.statusCode);
 
     const id_user = data.data;
 
-    const recetaGuardada = await recetasGuardadas.findByPk(id);
-    if (!recetaGuardada)
-      return response.setErrorResponse('Receta Guardada no encontrada', 204);
+    const recetaGuardada = await recetasGuardadas.findOne({
+      where: {
+        user_id: id_user,
+        receta_id: id,
+      },
+    });
+
+    if (!recetaGuardada) return response.setErrorResponse('Receta  guardada no existe', 204);
 
     if (id_user !== recetaGuardada.user_id)
       return response.setErrorResponse('No cuenta con los permisos para borrarlo', 204);
 
     await recetasGuardadas.destroy({
       where: {
-        id: id,
+        user_id: id_user,
+        receta_id: id,
       },
     });
 
@@ -106,8 +114,49 @@ const deleteRecetasGuardadas = async (req, res) => {
   }
 };
 
+const deleteRecetasGuardadasByRecipe = async (req, res) => {
+  const response = new ServiceResponse();
+  const { id } = req.params;
+  try {
+    const receta = await RecetaModel.findByPk(id);
+    if (!receta) return response.setErrorResponse('La receta no existe', 204);
+
+    const data = await authorize(req);
+
+    if (!data.success) {
+      return response.setErrorResponse(data.message, data.statusCode);
+    }
+
+    if (receta.user_id !== data.data) {
+      return response.setErrorResponse(
+        'No se tienen los permisos para eliminar esta receta',
+        403
+      );
+    }
+
+    const resRecipeSave = await recetasGuardadas.destroy({
+      where: {
+        receta_id: id,
+      },
+    });
+
+    if (!resRecipeSave)
+      return response.setErrorResponse('No hay recetas guardadas para ningun usuario');
+
+    response.setSucessResponse(
+      'Recetas guardadas eliminados de todos los usuarios  ',
+      resRecipeSave
+    );
+  } catch (error) {
+    response.setErrorResponse(error.message, error.code);
+  } finally {
+    res.send(response);
+  }
+};
+
 module.exports = {
   createRecetasGuardadas,
   deleteRecetasGuardadas,
-  getRecetasGugetardadasUser,
+  getRecetasGuardadasUser,
+  deleteRecetasGuardadasByRecipe,
 };
