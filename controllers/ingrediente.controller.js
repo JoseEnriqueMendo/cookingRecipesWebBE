@@ -1,5 +1,6 @@
 const { ingrediente } = require("../Models/ingrediente.model");
 const ServiceResponse = require("../helpers/serviceResponse");
+const { Op, Sequelize } = require("sequelize");
 
 const createIngrediente = async (req, res) => {
   const { name, category, img } = req.body;
@@ -80,7 +81,7 @@ const getByName = async (req, res) => {
 
   try {
     const Ingrediente = await ingrediente.findOne({
-      where: { name: ingredienteName },
+      where: { name: { [Op.iLike]: `%${ingredienteName}%` } },
     });
 
     if (!Ingrediente) {
