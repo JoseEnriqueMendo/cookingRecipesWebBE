@@ -308,24 +308,25 @@ const getRecipeById = async (req, res = response) => {
 };
 
 const FuzzySearch = async (req, res) => {
-  const { name } = req.params; // Obtener el ID de la receta a eliminar
+  const { name } = req.params;
   const searchResponse = new ServiceResponse();
   try {
+    // Escapa los caracteres especiales en la entrada para evitar errores de sintaxis en SQL
+    const escapedName = name.replace(/'/g, "''");
+
     const trigramResults = await RecetaModel.findAll({
-      where: Sequelize.literal(`similarity(name, '${name}') > 0.3`), // Ajusta el umbral de similitud según lo necesites
-      order: Sequelize.literal(`similarity(name, '${name}') DESC`),
+      where: Sequelize.literal(`similarity(name, '${escapedName}') > 0.3`),
+      order: Sequelize.literal(`similarity(name, '${escapedName}') DESC`),
     });
 
-    // Búsqueda usando LIKE
     const likeResults = await RecetaModel.findAll({
       where: {
         name: {
-          [Op.like]: `%${name}%`,
+          [Op.like]: `%${escapedName}%`,
         },
       },
     });
 
-    // Combina y elimina duplicados
     const combinedResults = [...trigramResults, ...likeResults];
     const uniqueResults = combinedResults.filter(
       (value, index, self) => index === self.findIndex((t) => t.id === value.id)
