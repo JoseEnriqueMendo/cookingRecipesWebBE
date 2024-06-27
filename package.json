@@ -1,6 +1,7 @@
 {
   "scripts": {
-    "start": "nodemon index.js"
+    "start": "node index.js",
+    "test": "nodemon index.js"
   },
   "dependencies": {
     "@sequelize/postgres": "^7.0.0-alpha.41",
