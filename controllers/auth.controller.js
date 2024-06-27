@@ -73,7 +73,7 @@ const loginGoogle = async (req, res) => {
 };
 
 const createUser = async (req, res) => {
-  const { name, surname, email, password, phone, image } = req.body;
+  const { name, surname, email, password, phone, image, username } = req.body;
   const response = new ServiceResponse();
 
   try {
@@ -85,6 +85,15 @@ const createUser = async (req, res) => {
 
     if (users) return response.setErrorResponse('Ya existe un usuario para ese correo', 204);
 
+    const userR = await User.findOne({
+      where: {
+        username: username,
+      },
+    });
+
+    if (userR)
+      return response.setErrorResponse('Ya existe un usuario con este nombre de usuario', 204);
+
     const hashedPassword = await hashPassword(password);
     const respuesta = await User.create({
       name: name,
@@ -93,6 +102,7 @@ const createUser = async (req, res) => {
       phone: phone,
       password: hashedPassword,
       image: image,
+      username: username,
     });
 
     response.setSucessResponse('Usuario registrado exitosamente', respuesta);
@@ -104,7 +114,7 @@ const createUser = async (req, res) => {
 };
 
 const createGoogleUser = async (req, res) => {
-  const { name, surname, email, image } = req.body;
+  const { name, surname, email, image, username } = req.body;
   const response = new ServiceResponse();
 
   try {
@@ -114,6 +124,15 @@ const createGoogleUser = async (req, res) => {
       },
     });
 
+    const userR = await User.findOne({
+      where: {
+        username: username,
+      },
+    });
+
+    if (userR)
+      return response.setErrorResponse('Ya existe un usuario con este nombre de usuario', 204);
+
     if (users) return response.setErrorResponse('Ya existe un usuario para ese correo', 204);
 
     const respuesta = await User.create({
@@ -121,6 +140,7 @@ const createGoogleUser = async (req, res) => {
       surname: surname,
       email: email,
       image: image,
+      username: username,
     });
 
     response.setSucessResponse('Usuario registrado exitosamente', respuesta);
